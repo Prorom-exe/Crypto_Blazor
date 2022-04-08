@@ -1,0 +1,167 @@
+﻿@page "/lab4"
+@using Crypto_Blazor.Data
+@using System.Collections
+@using System.Text
+@inject WeatherForecastService ForecastService
+<h3>lab4 </h3>
+<h3>Поточный метод продукционного шифрования Фейстеля </h3>
+<h5>Сообщение</h5>
+<input @bind-value="message" />
+<button @onclick="Crypt">Зашифровать</button>
+<h3>До шифрования @messageBitString</h3>
+<h3>После шифрования @messageBitStringCrypt</h3>
+<h3>@cryptResult</h3>
+<button @onclick="DeCrypt">Расшифровать</button>
+<h3>До @DecryptResultBit</h3>
+<h3>После @DecryptResultBit2</h3>
+<h3>@DecryptResult</h3>
+
+@code {
+
+    private const int sizeOfBlock = 128; //в DES размер блока 64 бит, но поскольку в unicode символ в два раза длинее, то увеличим блок тоже в два раза
+    private const int sizeOfChar = 16; //размер одного символа (in Unicode 16 bit)
+
+    private const int shiftKey = 2; //сдвиг ключа
+
+    private const int quantityOfRounds = 16; //количество раундов
+
+    string[] Blocks; //сами блоки в двоичном формате
+    string keyView;
+    string message;
+    string messageBitString;
+    string messageBitStringCrypt;
+    string cryptResult;
+    string DecryptResult;
+    string DecryptResultBit;
+    string DecryptResultBit2;
+    private int[] pOrder = new int[] { 2, 1, 5, 7, 3, 6, 4, 0 };
+    private byte[] resultBytes;
+    async void Crypt()
+    {
+        string input = message.Replace(" ", "");
+
+        if (string.IsNullOrEmpty(input) == false)
+        {
+            var textBytes = Encoding.UTF8.GetBytes(input);
+
+            var bitStringBuilder = new StringBuilder();
+            var bit2StringBuilder = new StringBuilder();
+            var result = new List<byte>();
+            foreach (var chunk in textBytes.Chunk(2))
+            {
+                foreach (var byte1 in chunk)
+                {
+                    var bitArray = new BitArray(new[] { byte1 });
+                    for (int i = 0; i < bitArray.Count; i++)
+                    {
+                        bitStringBuilder.Append(bitArray.Get(i) ? '1' : '0');
+                    }
+                    bitStringBuilder.Append(' ');
+                }
+
+                bitStringBuilder.Append("  ");
+
+                var l = chunk[0..1];
+                var r = chunk.Length % 2.0 == 0 ? chunk[1..2] : Encoding.Default.GetBytes(" ");
+
+                var encryptedBytes = Encrypt(new BitArray(l), new BitArray(r));
+
+                foreach (var byte1 in encryptedBytes)
+                {
+                    var bitArray = new BitArray(new[] { byte1 });
+                    for (int i = 0; i < bitArray.Count; i++)
+                    {
+                        bit2StringBuilder.Append(bitArray.Get(i) ? '1' : '0');
+                    }
+                    bit2StringBuilder.Append(' ');
+                }
+
+                bit2StringBuilder.Append("  ");
+
+                result.AddRange(encryptedBytes);
+            }
+
+            messageBitString = bitStringBuilder.ToString();
+            messageBitStringCrypt += "\n" + bit2StringBuilder.ToString();
+
+            resultBytes = result.ToArray();
+            var resultString = Convert.ToBase64String(resultBytes);
+            cryptResult = resultString;
+        }
+    }
+    async void DeCrypt()
+    {
+        string encriptedText = cryptResult;
+
+            if (string.IsNullOrEmpty(encriptedText) == false)
+            {
+                var bitStringBuilder = new StringBuilder();
+                var bit2StringBuilder = new StringBuilder();
+                
+                var bytes = Convert.FromBase64String(encriptedText);
+                var result = new List<byte>();
+                foreach (var chunk in bytes.Chunk(2))
+                {
+                    foreach (var byte1 in chunk)
+                    {
+                        var bitArray = new BitArray(new [] {byte1});
+                        for (int i = 0; i < bitArray.Count; i++)
+                        {
+                            bitStringBuilder.Append(bitArray.Get(i) ? '1' : '0');
+                        }
+                        bitStringBuilder.Append(' ');
+                    }
+                    var r = chunk[0..1];
+                    var l = chunk.Length % 2.0 == 0 ? chunk[1..2] : Encoding.Default.GetBytes(" ");
+
+                    var encryptedBytes = Encrypt(new BitArray(r), new BitArray(l));
+                    
+                    foreach (var byte1 in encryptedBytes)
+                    {
+                        var bitArray = new BitArray(new [] {byte1});
+                        for (int i = 0; i < bitArray.Count; i++)
+                        {
+                            bit2StringBuilder.Append(bitArray.Get(i) ? '1' : '0');
+                        }
+                        bit2StringBuilder.Append(' ');
+                    }
+                    
+                    bit2StringBuilder.Append("  ");
+    
+                    result.AddRange(encryptedBytes);
+                }
+
+                resultBytes = result.ToArray();
+
+                DecryptResultBit = bitStringBuilder.ToString();
+                DecryptResultBit2 = bit2StringBuilder.ToString();
+                DecryptResult = Encoding.UTF8.GetString(resultBytes);
+            }
+    }
+    byte[] Encrypt(BitArray lBits, BitArray rBits, int i = 0)
+    {
+        if (i == 32)
+        {
+            var bytes = new byte[2];
+            lBits.CopyTo(bytes, 1);
+            rBits.CopyTo(bytes, 0);
+            return bytes;
+        }
+        var newR = lBits.Xor(F(rBits));
+
+        return Encrypt(rBits, newR, ++i);
+    }
+
+
+    BitArray F(BitArray rightBits)
+    {
+        var reorderedBits = new bool[rightBits.Length];
+        for (int i = 0; i < pOrder.Length; i++)
+        {
+            reorderedBits[i] = rightBits.Get(pOrder[i]);
+        }
+
+        return new BitArray(reorderedBits);
+    }
+    }
+

@@ -1,0 +1,39 @@
+﻿
+
+@using Crypto_Blazor.Data
+@inject WeatherForecastService ForecastService
+
+<label>Сообщение</label> <br />
+<input @bind-value="@message" /> <br /> <br />
+<input @bind-value="@size" type="number" /> <br />
+<button @onclick="Crypt" > Зашифровать</button>
+<button @onclick="DeCrypt" > Расшифровать</button>
+<p>
+    <h4>Зашифрованное сообщение</h4>
+    <h4>@result</h4>
+</p>
+<p>
+    <h4>Расшифрованное сообщение</h4>
+    <h4>@resultTwo</h4>
+</p>
+@code {
+    string message;
+    int size;
+    string result;
+    string resultTwo;
+    private WeatherForecast[]? forecasts;
+    async void  Crypt()
+    {
+        result = await ForecastService.Lab1_Crypto(message, size);
+        StateHasChanged();
+    }
+
+    async void DeCrypt()
+    {
+        resultTwo = await ForecastService.Lab1_DeCrypto(message, size); 
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+    }
+}

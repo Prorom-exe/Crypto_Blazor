@@ -1,0 +1,123 @@
+﻿@page "/lab3-2"
+@using Crypto_Blazor.Data
+@inject WeatherForecastService ForecastService
+<h3>lab3-1 </h3>
+<h3>Одноразовое заполнение (шифр Вернама) </h3>
+<label>Сообщение Шифрования</label>
+<br />
+<input @bind-value="@message" />
+<br />
+<br />
+<label>Сообщение Дешифрования</label>
+<br />
+<input @bind-value="@messageTwo" />
+<br />
+<br />
+<label>Кодовое слово</label>
+<br />
+<input @bind-value="key" />
+<br />
+<br />
+<br />
+<button @onclick="KeyGenerate"> Генерация ключа</button>
+<button @onclick="Crypt"> Зашифровать</button>
+<button @onclick="DeCrypt"> Расшифровать</button>
+<p>
+    <h4>Зашифрованное сообщение</h4>
+    @if (!String.IsNullOrWhiteSpace(message) && !String.IsNullOrWhiteSpace(key))
+    {
+        <div class="card border p-2 mt-2">
+            <h4>@message</h4>
+            <h5>@GetCharCodes(message)</h5>
+        </div>
+    <p>
+        <div class="card border p-2">
+            <h4>@key</h4>
+            <h5>@GetCharCodes(key)</h5>
+        </div>
+    </p>
+    <h4>@resultString</h4>
+
+    }
+</p>
+<p>
+    <h4>Расшифрованное сообщение</h4>
+    <h4>@resultTwo</h4>
+</p>
+@code {
+    string message;
+    string messageTwo;
+    string key;
+    string NormalizedKey;
+    string resultString;
+    int[] result;
+    string resultTwo;
+    public void KeyGenerate()
+    {
+        char[] endtext2 = new char[]
+                { 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л',
+      'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш',
+      'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я' };
+        Random rnd = new Random();
+        key = "";
+        foreach (var x in message)
+        {
+            int y = rnd.Next(0, 32);
+            char ad = endtext2[y];
+            key += ad;
+        }
+    }
+    async void Crypt()
+    {
+        resultString = "";
+        var mesMass = message.ToArray();
+        var keyMass = key.ToArray();
+        for (int i = 0; i < key.Length; i++)
+        {
+            resultString += $"{GetNumberInChar(mesMass[i]) ^ GetNumberInChar(keyMass[i])}" + " ";
+        }
+
+        StateHasChanged();
+    }
+
+    async void DeCrypt()
+    {
+        resultTwo = "";
+        var keyMass = key.ToArray();
+        var mass = messageTwo.Split(" ");
+        for (int i = 0; i < key.Length; i++)
+        {
+            resultTwo += GetCharInNumber((Convert.ToInt32(mass[i]) ^ GetNumberInChar(keyMass[i])) + 1) + " ";
+        }
+        StateHasChanged();
+    }
+
+    public string GetCharCodes(string message)
+    {
+        string result = "";
+        foreach(var x in message.ToArray())
+        {
+            result += GetNumberInChar(x);
+            result += " ";
+        }
+        return result;
+    }
+    private int GetNumberInChar(char value)
+    {
+        char[] endtext2 = new char[]
+                { 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л',
+      'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш',
+      'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я' };
+        return endtext2.ToList().IndexOf(value);
+    }
+    private char GetCharInNumber(int number)
+    {
+        char[] endtext2 = new char[]
+                { 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л',
+      'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш',
+      'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я' };
+
+        return endtext2.ToList()[number - 1];
+    }
+
+}

@@ -1,0 +1,31 @@
+﻿<table>
+    @for (var i = 0; i < rowCount; i++)
+    {
+        chars = Message.Skip(i*Size).Take(Size).ToList();
+        <tr>
+            @foreach (var ch in chars)
+            {
+                <td>
+                    @ch
+                </td>
+            }
+        </tr>
+    }
+</table>
+
+@code {
+    [Parameter]
+    public int Size { get; set; }
+    [Parameter]
+    public string Message { get; set; }
+    List<char> chars;
+    int rowCount;
+    protected override void OnParametersSet()
+    {
+        if (Message != null && Size != 0)
+        {
+            Message = Message.Replace(" ", "");
+            rowCount = Message.Length / Size + 1;
+        }
+    }
+}

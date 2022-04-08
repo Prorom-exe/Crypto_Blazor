@@ -1,0 +1,176 @@
+﻿@page "/lab6"
+@using Crypto_Blazor.Data
+@using System.Numerics
+@inject WeatherForecastService ForecastService
+<h3>lab6 </h3>
+<h3>RSA </h3>
+<div>
+    <h3>Введите простые числа p  q</h3>
+    <input @bind-value="p" class="input-group m-3" />
+    <input @bind-value="q" class="input-group m-3" />
+    <button class="btn btn-primary" @onclick="Go">GO</button>
+</div>
+<div class="card border m-2">
+    <h5>n = @n </h5>
+    <h5>F(n) = @Fn </h5>
+    <h5>d = @d </h5>
+    <h5>e = @e </h5>
+    <h5>Открытый ключ = @e,@n </h5>
+    <h5>Закрытый ключ = @d,@n </h5>
+</div>
+<h1>Введите сообщение</h1>
+<input type="text" @bind-value="encodeMessage" />
+<button class="btn btn-primary" @onclick="Decrypt">Зашифровать</button>
+@if (decode != null)
+{
+    <div class="card border m-2">
+        <table>
+            <tr>
+                @foreach(var x in encodeMessage)
+                {
+                    <th>@x</th>
+                }
+            </tr>
+            <tr>
+                @foreach(var y in decode)
+                {
+                    <th>@y</th>
+                }
+            </tr>
+        </table>
+
+    </div>
+}
+<h1>Введите зашифрованное сообщение</h1>
+<input type="text" @bind-value="decodeMessage" />
+<button class="btn btn-primary" @onclick="Encrypt">Расшифровать</button>
+@if (encode != null)
+{
+    <div class="card border m-2">
+        <table>
+            <tr>
+                @foreach(var x in decodeMessage.Split(" "))
+                {
+                    <th>@x</th>
+                }
+            </tr>
+            <tr>
+                @foreach(var y in encode)
+                {
+                    <th>@y</th>
+                }
+            </tr>
+        </table>
+
+    </div>
+}
+@code {
+    double p;
+    double q;
+    double n;
+    double Fn;
+    double e;
+    double d;
+    string encodeMessage;
+    string decodeMessage;
+    double[] decode;
+    char[] encode;
+
+    async void Encrypt()
+    {
+        if (String.IsNullOrWhiteSpace(decodeMessage))
+        {
+            foreach(var x in decode)
+            {
+                decodeMessage += x + " ";
+            }
+            decodeMessage =  decodeMessage.TrimEnd();
+        }
+        var list = decodeMessage.Split(" ");
+        encode = new char[list.Length];
+        int i = 0;
+        foreach(var x in list)
+        {
+            var number = Convert.ToInt32(x);
+            BigInteger result = new BigInteger();
+            BigInteger big = new BigInteger(number);
+            result = BigInteger.Pow(number, (int)d);
+            result = result % (int)n;
+            int m = Convert.ToInt32(result.ToString());
+            //int m =(int)(Math.Pow(number, d) % n);
+            encode[i] = GetCharInNumber(m);
+            i++;
+        }
+        StateHasChanged();
+    }
+    async void Decrypt()
+    {
+        decode = new double[encodeMessage.Length];
+        for (int i = 0; i < encodeMessage.Length; i++)
+        {
+            var cur = GetNumberInChar(encodeMessage[i]);
+            decode[i] = Math.Pow(cur, e) % n;
+        }
+    }
+    async void Go()
+    {
+        n = p * q;
+        Fn = (p - 1) * (q - 1);
+        for (double i = 2; i < Fn; i++)
+        {
+            if (gcd(i, Fn) == 1)
+            {
+                e = i;
+                break;
+            }
+        }
+        d = Calculate_d(e, Fn);
+        StateHasChanged();
+    }
+    double gcd(double a, double b)
+    {
+        for (double i = a; i > 0; i--)
+        {
+            if (a % i == 0)
+            {
+                if (b % i == 0)
+                {
+                    return i;
+                }
+            }
+        }
+        return 0;
+    }
+    private double Calculate_d(double d, double m)
+    {
+        double e = 10;
+
+        while (true)
+        {
+            if ((e * d) % m == 1)
+                break;
+            else
+                e++;
+        }
+
+        return e;
+    }
+
+    private int GetNumberInChar(char value)
+    {
+        char[] endtext2 = new char[]
+                { 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л',
+      'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш',
+      'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я' };
+        return endtext2.ToList().IndexOf(value)+10;
+    }
+    private char GetCharInNumber(int number)
+    {
+        char[] endtext2 = new char[]
+                { 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л',
+      'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш',
+      'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я' };
+
+        return endtext2.ToList()[number - 10];
+    }
+}

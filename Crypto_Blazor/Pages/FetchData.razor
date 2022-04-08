@@ -1,0 +1,51 @@
+﻿@page "/lab1"
+
+<PageTitle>Weather forecast</PageTitle>
+
+@using Crypto_Blazor.Data
+@inject WeatherForecastService ForecastService
+
+<label>Сообщение</label>
+<br />
+<input @bind-value="@message" />
+<br />
+<br />
+<input @bind-value="@size" type="number" />
+<br />
+<button @onclick="Crypt"> Зашифровать</button>
+<button @onclick="DeCrypt"> Расшифровать</button>
+<p>
+    <TableComponent Message="@message" Size="@size"/>
+</p>
+<p>
+    <h4>Зашифрованное сообщение</h4>
+    <h4>@result</h4>
+</p>
+<p>
+    <h4>Расшифрованное сообщение</h4>
+    <h4>@resultTwo</h4>
+</p>
+@code {
+    string message;
+    char[] messageChar;
+    int size;
+    string result;
+    string resultTwo;
+    int rowCount;
+    private WeatherForecast[]? forecasts;
+    async void Crypt()
+    {
+        result = await ForecastService.Lab1_Crypto(message, size);
+        StateHasChanged();
+    }
+
+    async void DeCrypt()
+    {
+        resultTwo = await ForecastService.Lab1_DeCrypto(result, size);
+        resultTwo = message;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+    }
+}

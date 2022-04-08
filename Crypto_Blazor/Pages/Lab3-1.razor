@@ -1,0 +1,53 @@
+﻿@page "/lab3-1"
+@using Crypto_Blazor.Data
+@inject WeatherForecastService ForecastService
+<h3>lab3-1 </h3>
+<h3>Система Виженера подобна полиалфавитной системе </h3>
+<label>Сообщение Шифрования</label> <br />
+<input @bind-value="@message" /> <br /> <br />
+<label>Сообщение Дешифрования</label> <br />
+<input @bind-value="@messageTwo" /> <br /> <br />
+<label>Кодовое слово</label> <br />
+<input @bind-value="@key"  /> <br />
+<button @onclick="Crypt" > Зашифровать</button>
+<button @onclick="DeCrypt" > Расшифровать</button>
+<p>
+    <h4>Зашифрованное сообщение</h4>
+    @if(!String.IsNullOrWhiteSpace(message) && !String.IsNullOrWhiteSpace(key))
+    {
+        <h4>На вход @message</h4>
+        <h4>Ключ @GetKeyString()</h4>
+        <h4>Итог @result</h4>
+    }
+</p>
+<p>
+    <h4>Расшифрованное сообщение</h4>
+    <h4>@resultTwo</h4>
+</p>
+@code {
+    string message;
+    string messageTwo;
+    string key;
+    string NormalizedKey;
+    string result;
+    string resultTwo;
+    public string GetKeyString()
+    {
+        NormalizedKey = key + message;
+        NormalizedKey = NormalizedKey.Substring(0,message.Length);
+        return NormalizedKey;
+    }
+    async void  Crypt()
+    {
+        GetKeyString();
+        result = await ForecastService.Lab2_Crypto(message, NormalizedKey);
+        StateHasChanged();
+    }
+
+    async void DeCrypt()
+    {
+        GetKeyString();
+        resultTwo = await ForecastService.Lab2_DeCrypto(messageTwo, NormalizedKey); 
+    }
+    
+}

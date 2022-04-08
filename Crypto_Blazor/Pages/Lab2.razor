@@ -1,0 +1,49 @@
+﻿@page "/lab2"
+@using Crypto_Blazor.Data
+@inject WeatherForecastService ForecastService
+<h3>lab2</h3>
+<label>Сообщение</label> <br />
+<input @bind-value="@message" /> <br /> <br />
+<label>Кодовое слово</label> <br />
+<input @bind-value="@size"  /> <br />
+<button @onclick="Crypt" > Зашифровать</button>
+<button @onclick="DeCrypt" > Расшифровать</button>
+<p>
+    <h4>Зашифрованное сообщение</h4>
+    @if(!String.IsNullOrWhiteSpace(message) && !String.IsNullOrWhiteSpace(size))
+    {
+        <h4>@message</h4>
+        <h4>@GetKeyString()</h4>
+        <h4>@result</h4>
+    }
+</p>
+<p>
+    <h4>Расшифрованное сообщение</h4>
+    <h4>@resultTwo</h4>
+</p>
+@code {
+    string message;
+    string size;
+    string result;
+    string resultTwo;
+    public string GetKeyString()
+    {
+        string key = "";
+        for(var i = 0; i < 15; i++)
+        {
+            key += size;
+        }
+        return key.Substring(0,message.Length);
+    }
+    async void  Crypt()
+    {
+        result = await ForecastService.Lab2_Crypto(message, size);
+        StateHasChanged();
+    }
+
+    async void DeCrypt()
+    {
+        resultTwo = await ForecastService.Lab2_DeCrypto(result, size); 
+    }
+    
+}

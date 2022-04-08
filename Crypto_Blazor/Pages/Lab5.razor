@@ -1,0 +1,68 @@
+﻿@page "/lab5"
+@using Crypto_Blazor.Data
+@inject WeatherForecastService ForecastService
+<h3>lab5 </h3>
+<h3>Ключевой обмен Диффи-Хеллман </h3>
+<div>
+    <label>генератор g</label>
+    <input @bind-value="g" placeholder="генератор g" class="m-3" />
+</div>
+<div>
+    <label>простой модуль p</label>
+    <input @bind-value="p" placeholder="простой модуль p" class="m-3" />
+</div>
+@if (i == 2)
+{
+    <h3>Обмен общими ключами произошел</h3>
+}
+<div class="row">
+    <div class="card border m-3">
+        <h1>Alice</h1>
+        <h5>Частный ключ @alicePrivatKey </h5>
+        <h5>Общий ключ @alicePublicKey </h5>
+        <h5>K = @aliceK </h5>
+    </div>
+    <div class="card border m-3">
+        <h1>Bob</h1>
+       <h5>Частный ключ @bobPrivatKey </h5>
+        <h5>Общий ключ @bobPublicKey </h5>
+        <h5>K = @bobK </h5>
+    </div>
+</div>
+<button class="btn btn-primary" @onclick="Go">Вперед</button>
+@code {
+    double i = 0;
+    double g;
+    double p;
+    double alicePrivatKey;
+    double alicePublicKey;
+    double aliceK;
+    double bobPrivatKey;
+    double bobPublicKey;
+    double bobK;
+   
+
+
+    async void Go()
+    {
+        if (i == 0)
+        {
+            Random random = new Random();
+            alicePrivatKey = random.Next(2, (int)(p - 1));
+            bobPrivatKey = random.Next(2, (int)(p - 1));
+        }
+        if (i == 1)
+        {
+            alicePublicKey = Math.Pow(g, alicePrivatKey) % p;
+            bobPublicKey = Math.Pow(g, bobPrivatKey) % p;
+        }
+        if (i == 3)
+        {
+            aliceK = Math.Pow(bobPublicKey, alicePrivatKey) % p;
+            bobK = Math.Pow(alicePublicKey, bobPrivatKey) % p;
+        }
+        i++;
+        StateHasChanged();
+    }
+
+}
