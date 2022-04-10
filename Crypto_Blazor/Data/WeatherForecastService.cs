@@ -17,13 +17,15 @@ namespace Crypto_Blazor.Data
             }).ToArray());
         }
         #region Lab1
-        public Task<string> Lab1_Crypto(string message, int size)
+        public async Task<string> Lab1_Crypto(string message, string size)
         {
-            string result = "";
+            string cryptMessage = "";
             var letters = message.Replace(" ", "").ToCharArray();
-            for (int i = 0; i < size; i++)
+            var list = new List<(int, string)>();
+            for (int i = 0; i < size.Length; i++)
             {
-                for (int j = i; j < letters.Length; j = j + size)
+                string result = "";
+                for (int j = i; j < letters.Length; j = j + size.Length)
                 {
                     try
                     {
@@ -34,20 +36,33 @@ namespace Crypto_Blazor.Data
 
                     }
                 }
+                list.Add((i, result));
+                result = "";
             }
-            return Task.FromResult(result);
+           var  ListNumbered = new List<(int, int)>();
+            for (int i = 0; i < size.Length; i++)
+            {
+                ListNumbered.Add((i,GetNumberInChar(size[i])));
+            }
+            foreach(var rs in ListNumbered.OrderBy(x => x.Item2))
+            {
+                cryptMessage += list.First(x=> x.Item1 == rs.Item1).Item2;
+            }
+            return cryptMessage;
         }
-        public Task<string> Lab1_DeCrypto(string message, int size)
+        public async Task<string> Lab1_DeCrypto(string message, string size)
         {
-            string result = "";
+            string encryptMessage = "";
             var letters = message.Replace(" ", "").ToCharArray();
             int height = 1;
-            while ((height * size) < letters.Length)
+            var list = new List<(int, string)>();
+            while ((height * size.Length) < letters.Length)
             {
                 height++;
             }
             for (int i = 0; i < height; i++)
             {
+                string result = "";
                 for (int j = i; j < letters.Length; j = j + height)
                 {
                     try
@@ -59,8 +74,19 @@ namespace Crypto_Blazor.Data
 
                     }
                 }
+                list.Add((i, result));
+                result = "";
             }
-            return Task.FromResult(result);
+            var ListNumbered = new List<(int, int)>();
+            for (int i = 0; i < size.Length; i++)
+            {
+                ListNumbered.Add((i, GetNumberInChar(size[i])));
+            }
+            foreach (var rs in ListNumbered)
+            {
+                encryptMessage += list.First(x => x.Item1 == rs.Item1).Item2;
+            }
+            return encryptMessage;
         }
         #endregion
         #region Lab2

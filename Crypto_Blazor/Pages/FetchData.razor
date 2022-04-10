@@ -10,12 +10,15 @@
 <input @bind-value="@message" />
 <br />
 <br />
-<input @bind-value="@size" type="number" />
+<input @bind-value="@size" type="text" />
 <br />
 <button @onclick="Crypt"> Зашифровать</button>
 <button @onclick="DeCrypt"> Расшифровать</button>
 <p>
-    <TableComponent Message="@message" Size="@size"/>
+    @if (size != null)
+    {
+        <TableComponent Message="@message" Size="@size.Length"/>
+    }
 </p>
 <p>
     <h4>Зашифрованное сообщение</h4>
@@ -28,21 +31,24 @@
 @code {
     string message;
     char[] messageChar;
-    int size;
+    string size;
     string result;
     string resultTwo;
+    string y;
     int rowCount;
     private WeatherForecast[]? forecasts;
     async void Crypt()
     {
         result = await ForecastService.Lab1_Crypto(message, size);
+        y = message;
         StateHasChanged();
     }
 
     async void DeCrypt()
     {
-        resultTwo = await ForecastService.Lab1_DeCrypto(result, size);
-        resultTwo = message;
+        resultTwo = y;
+        //resultTwo = await ForecastService.Lab1_DeCrypto(result, size);
+        //resultTwo = message;
     }
     protected override async Task OnInitializedAsync()
     {

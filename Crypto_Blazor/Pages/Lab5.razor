@@ -1,5 +1,6 @@
 ﻿@page "/lab5"
 @using Crypto_Blazor.Data
+@using System.Numerics
 @inject WeatherForecastService ForecastService
 <h3>lab5 </h3>
 <h3>Ключевой обмен Диффи-Хеллман </h3>
@@ -35,11 +36,11 @@
     double g;
     double p;
     double alicePrivatKey;
-    double alicePublicKey;
-    double aliceK;
+    BigInteger alicePublicKey;
+    BigInteger aliceK;
     double bobPrivatKey;
-    double bobPublicKey;
-    double bobK;
+    BigInteger bobPublicKey;
+    BigInteger bobK;
    
 
 
@@ -53,13 +54,13 @@
         }
         if (i == 1)
         {
-            alicePublicKey = Math.Pow(g, alicePrivatKey) % p;
-            bobPublicKey = Math.Pow(g, bobPrivatKey) % p;
+            alicePublicKey = BigInteger.Pow((int)g, (int)alicePrivatKey) % (int)p;
+            bobPublicKey = BigInteger.Pow((int)g, (int)bobPrivatKey) % (int)p;
         }
         if (i == 3)
         {
-            aliceK = Math.Pow(bobPublicKey, alicePrivatKey) % p;
-            bobK = Math.Pow(alicePublicKey, bobPrivatKey) % p;
+            aliceK = BigInteger.Pow(bobPublicKey, (int)alicePrivatKey) % (int)p;
+            bobK = BigInteger.Pow(alicePublicKey, (int)bobPrivatKey) % (int)p;
         }
         i++;
         StateHasChanged();
